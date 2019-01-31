@@ -168,7 +168,7 @@ scan () {
 
 ip_scan () {
 	if [ ! -z "$1" ]; then
-    sudo hping3 -2 -c 10 -p 5353 -i u1 $1
+    $(sudo hping3 -2 -c 10 -p 5353 -i u1 $1)
 		local result=$(ping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
 		debug_echo "Scan result: [$result]"
 		echo "$result"
@@ -177,7 +177,7 @@ ip_scan () {
 
 arp_scan () {
 	if [ ! -z "$1" ]; then
-    sudo hping3 -2 -c 10 -p 5353 -i u1 $1
+    $(sudo hping3 -2 -c 10 -p 5353 -i u1 $1)
 		local result=$(sudo arping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
 		debug_echo "Scan result: [$result]"
 		echo "$result"
