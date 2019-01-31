@@ -168,7 +168,7 @@ scan () {
 
 ip_scan () {
 	if [ ! -z "$1" ]; then
-		local result=$(ping -c 5 "$1" 2>&1 | grep 'from' && echo 'present' )
+		local result=$(ping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
 		debug_echo "Scan result: [$result]"
 		echo "$result"
 	fi
@@ -176,7 +176,7 @@ ip_scan () {
 
 arp_scan () {
 	if [ ! -z "$1" ]; then
-		local result=$(sudo arping -c 5 "$1" 2>&1 | grep 'from' && echo 'present' )
+		local result=$(sudo arping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
 		debug_echo "Scan result: [$result]"
 		echo "$result"
 	fi
@@ -264,7 +264,7 @@ while true; do
 		duration_timer=$(( (end_time - start_timer) / 1000000 ))
 
 		#THIS DEVICE NAME IS PRESENT
-		if [ "$name_scan_result" != "" ] || [ "$ip_scan_result" != "" ] || [ "$arp_scan_result" != "" ]; then
+		if [ "$name_scan_result" != "" ] || [ "$ip_scan_result" != "" ] || [ "$arp_scan_result" != "" ] ; then
 
 			#STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
 			[ "${device_statuses[$index]}" == '100' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
