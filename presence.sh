@@ -264,7 +264,7 @@ while true; do
 		duration_timer=$(( (end_time - start_timer) / 1000000 ))
 
 		#THIS DEVICE NAME IS PRESENT
-		if [ "$name_scan_result" != "" || "$ip_scan_result" != "" || "$arp_scan_result" != "" ]; then
+		if [ "$name_scan_result" != "" ] || [ "$ip_scan_result" != "" ] || [ "$arp_scan_result" != "" ]; then
 
 			#STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
 			[ "${device_statuses[$index]}" == '100' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
