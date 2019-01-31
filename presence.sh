@@ -329,7 +329,7 @@ while true; do
 					duration_timer=$(( (end_time - start_timer) / 1000000 ))
 
 					#CHECK SCAN
-					if [ "$name_scan_result_verify" != "" ]; then
+					if [ "$name_scan_result_verify" != "" ] || [ "$ip_scan_result_verify" != "" ] || [ "$arp_scan_result_verify" != "" ] ; then
 
 						#STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
 						[ "${device_statuses[$index]}" == '100' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
