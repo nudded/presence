@@ -42,12 +42,12 @@ mosquitto_sub_path=$(which mosquitto_sub)
 
 #OR LOAD FROM A SOURCE FILE
 if [ ! -f "$base_directory/behavior_preferences" ]; then
-	echo -e "${GREEN}presence $VERSION ${RED}WARNING:  ${NC}Behavior preferences are not defined:${NC}"
-	echo -e "/behavior_preferences. Creating file and setting default values.${NC}"
-  	echo -e ""
+  echo -e "${GREEN}presence $VERSION ${RED}WARNING:  ${NC}Behavior preferences are not defined:${NC}"
+  echo -e "/behavior_preferences. Creating file and setting default values.${NC}"
+    echo -e ""
 
-  	#DEFAULT VALUES
-  	echo "
+    #DEFAULT VALUES
+    echo "
 #DELAY BETWEEN SCANS OF OWNER DEVICES WHEN AWAY FROM HOME
 delay_between_owner_scans_away=6
 
@@ -99,12 +99,12 @@ number_of_owners=$((${#macaddress_owners[@]}))
 # ----------------------------------------------------------------------------------------
 
 show_help_text() {
-	echo "Usage:"
-	echo "  presence -h 	show usage information"
-	echo "  presence -d 	print debug messages and mqtt messages"
-	echo "  presence -b 	binary output only; either 100 or 0 confidence"
-	echo "  presence -c 	only post confidence status changes for owners/guests"
-	echo "  presence -V		print version"
+  echo "Usage:"
+  echo "  presence -h   show usage information"
+  echo "  presence -d   print debug messages and mqtt messages"
+  echo "  presence -b   binary output only; either 100 or 0 confidence"
+  echo "  presence -c   only post confidence status changes for owners/guests"
+  echo "  presence -V   print version"
 }
 
 # ----------------------------------------------------------------------------------------
@@ -125,16 +125,16 @@ while getopts "h?Vdbct:" opt; do
         exit 0
         ;;
     V)
-		echo "$VERSION"
-		exit 0
-		;;
+    echo "$VERSION"
+    exit 0
+    ;;
     d)  debug=1
-		;;
+    ;;
     b)  binary_only=1
-		;;
-	c)  changes_only=1
-		;;
-	*)	echo "warning: unknown or depreciated option: $opt"
+    ;;
+  c)  changes_only=1
+    ;;
+  *)  echo "warning: unknown or depreciated option: $opt"
     esac
 done
 
@@ -149,9 +149,9 @@ shift $((OPTIND-1))
 # ----------------------------------------------------------------------------------------
 
 debug_echo () {
-	if [ "$debug" == "1" ]; then
-		(>&2 echo -e "${ORANGE}DEBUG MSG:	$1${NC}")
-	fi
+  if [ "$debug" == "1" ]; then
+    (>&2 echo -e "${ORANGE}DEBUG MSG: $1${NC}")
+  fi
 }
 
 # ----------------------------------------------------------------------------------------
@@ -159,29 +159,29 @@ debug_echo () {
 # ----------------------------------------------------------------------------------------
 
 scan () {
-	if [ ! -z "$1" ]; then
-		local result=$(hcitool -i $hci_device name "$1" 2>&1 | grep -v 'not available' | grep -vE "hcitool|timeout|invalid|error" )
-		debug_echo "Scan result: [$result]"
-		echo "$result"
-	fi
+  if [ ! -z "$1" ]; then
+    local result=$(hcitool -i $hci_device name "$1" 2>&1 | grep -v 'not available' | grep -vE "hcitool|timeout|invalid|error" )
+    debug_echo "Scan result: [$result]"
+    echo "$result"
+  fi
 }
 
 ip_scan () {
-	if [ ! -z "$1" ]; then
+  if [ ! -z "$1" ]; then
     local discard=$(sudo hping3 -2 -c 10 -p 5353 -i u1 "$1" 2>&1)
-		local result=$(ping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
-		debug_echo "Scan result: [$result]"
-		echo "$result"
-	fi
+    local result=$(ping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
+    debug_echo "Scan result: [$result]"
+    echo "$result"
+  fi
 }
 
 arp_scan () {
-	if [ ! -z "$1" ]; then
+  if [ ! -z "$1" ]; then
     local discard=$(sudo hping3 -2 -c 10 -p 5353 -i u1 "$1" 2>&1)
-		local result=$(sudo arping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
-		debug_echo "Scan result: [$result]"
-		echo "$result"
-	fi
+    local result=$(sudo arping -c 5 "$1" 2>&1 | grep -q 'from' && echo 'present' )
+    debug_echo "Scan result: [$result]"
+    echo "$result"
+  fi
 }
 
 # ----------------------------------------------------------------------------------------
@@ -189,34 +189,34 @@ arp_scan () {
 # ----------------------------------------------------------------------------------------
 
 publish () {
-	if [ ! -z "$1" ]; then
+  if [ ! -z "$1" ]; then
 
-		#SET NAME FOR 'UNKONWN'
-		local name="$3"
+    #SET NAME FOR 'UNKONWN'
+    local name="$3"
 
-		#IF NO NAME, RETURN "UNKNOWN"
-		if [ -z "$3" ]; then
-			name="Unknown"
-		fi
+    #IF NO NAME, RETURN "UNKNOWN"
+    if [ -z "$3" ]; then
+      name="Unknown"
+    fi
 
-		#TIMESTAMP
-		stamp=$(date "+%a %b %d %Y %H:%M:%S GMT%z (%Z)")
+    #TIMESTAMP
+    stamp=$(date "+%a %b %d %Y %H:%M:%S GMT%z (%Z)")
 
-		#DEBUGGING
-		[ "$debug" == "1" ] && (>&2 echo -e "${PURPLE}$mqtt_topicpath$1 { confidence : $2, name : $name, scan_duration_ms: $4, timestamp : $stamp} ${NC}")
+    #DEBUGGING
+    [ "$debug" == "1" ] && (>&2 echo -e "${PURPLE}$mqtt_topicpath$1 { confidence : $2, name : $name, scan_duration_ms: $4, timestamp : $stamp} ${NC}")
 
-		#POST TO MQTT
-		$mosquitto_pub_path -h "$mqtt_address" -p "${mqtt_port:=1883}" -u "$mqtt_user" -P "$mqtt_password" -t "$mqtt_topicpath$1" -m "{\"confidence\":\"$2\",\"name\":\"$name\",\"scan_duration_ms\":\"$4\",\"timestamp\":\"$stamp\"}"
-	fi
+    #POST TO MQTT
+    $mosquitto_pub_path -h "$mqtt_address" -p "${mqtt_port:=1883}" -u "$mqtt_user" -P "$mqtt_password" -t "$mqtt_topicpath$1" -m "{\"confidence\":\"$2\",\"name\":\"$name\",\"scan_duration_ms\":\"$4\",\"timestamp\":\"$stamp\"}"
+  fi
 }
 
 # ----------------------------------------------------------------------------------------
 # MAIN LOOP
 # ----------------------------------------------------------------------------------------
 
-device_statuses=()			#STORES STATUS FOR EACH BLUETOOTH DEVICES
-device_names=()				#STORES DEVICE NAMES FOR BOTH BEACONS AND BLUETOOTH DEVICES
-one_owner_home=0 			#FLAG FOR AT LEAST ONE OWNER BEING HOME
+device_statuses=()      #STORES STATUS FOR EACH BLUETOOTH DEVICES
+device_names=()       #STORES DEVICE NAMES FOR BOTH BEACONS AND BLUETOOTH DEVICES
+one_owner_home=0      #FLAG FOR AT LEAST ONE OWNER BEING HOME
 
 # ----------------------------------------------------------------------------------------
 # START THE OPERATIONAL LOOP
@@ -225,169 +225,174 @@ one_owner_home=0 			#FLAG FOR AT LEAST ONE OWNER BEING HOME
 #MAIN LOOP
 while true; do
 
-	#RESET AT LEAST ONE DEVICE HOME
-	one_owner_home=0
+  #RESET AT LEAST ONE DEVICE HOME
+  one_owner_home=0
 
-	#--------------------------------------
-	#	UPDATE STATUS OF ALL USERS WITH NAME QUERY
-	#--------------------------------------
-	for ((index=0; index<${#macaddress_owners[*]}; index++));
-	do
-		#CLEAR PER-LOOP VARIABLES
-		name_scan_result=""
-		name_scan_result_verify=""
-		ip_scan_result=""
-		ip_scan_result_verify=""
-		arp_scan_result=""
-		arp_scan_result_verify=""
-		ok_to_publish=1
+  #--------------------------------------
+  # UPDATE STATUS OF ALL USERS WITH NAME QUERY
+  #--------------------------------------
+  for ((index=0; index<${#macaddress_owners[*]}; index++));
+  do
+    #CLEAR PER-LOOP VARIABLES
+    name_scan_result=""
+    name_scan_result_verify=""
+    ip_scan_result=""
+    ip_scan_result_verify=""
+    arp_scan_result=""
+    arp_scan_result_verify=""
+    ok_to_publish=1
 
-		#OBTAIN INDIVIDUAL ADDRESS
-		current_device_address="${macaddress_owners[$index]}"
+    #OBTAIN INDIVIDUAL ADDRESS
+    current_device_address="${macaddress_owners[$index]}"
     current_device_ip_address="${ipaddress_owners[$index]}"
 
-		#CHECK FOR ADDITIONAL BLANK LINES IN ADDRESS FILE
-		if [ -z "$current_device_address" ]; then
-			continue
-		fi
+    #CHECK FOR ADDITIONAL BLANK LINES IN ADDRESS FILE
+    if [ -z "$current_device_address" ]; then
+      continue
+    fi
 
-		#MARK BEGINNING OF SCAN OPERATION
-		start_timer=$(date +%s%N)
+    #MARK BEGINNING OF SCAN OPERATION
+    start_timer=$(date +%s%N)
 
-		#OBTAIN RESULTS AND APPEND EACH TO THE SAME
-		name_scan_result=$(scan $current_device_address)
-		ip_scan_result=$(ip_scan $current_device_ip_address)
-		arp_scan_result=$(arp_scan $current_device_ip_address)
+    #OBTAIN RESULTS AND APPEND EACH TO THE SAME
+    name_scan_result=$(scan $current_device_address)
 
-		#MARK END OF SCAN OPERATION
-		end_time=$(date +%s%N)
+    if [ "$name_scan_result" == "" ] ; then
+      arp_scan_result=$(arp_scan $current_device_ip_address)
+    fi
+    if [ "$arp_scan_result" == "" ] ; then
+      ip_scan_result=$(ip_scan $current_device_ip_address)
+    fi
 
-		#CALCULATE DIFFERENCE
-		duration_timer=$(( (end_time - start_timer) / 1000000 ))
+    #MARK END OF SCAN OPERATION
+    end_time=$(date +%s%N)
 
-		#THIS DEVICE NAME IS PRESENT
-		if [ "$name_scan_result" != "" ] || [ "$ip_scan_result" != "" ] || [ "$arp_scan_result" != "" ] ; then
+    #CALCULATE DIFFERENCE
+    duration_timer=$(( (end_time - start_timer) / 1000000 ))
 
-			#STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
-			[ "${device_statuses[$index]}" == '100' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
+    #THIS DEVICE NAME IS PRESENT
+    if [ "$name_scan_result" != "" ] || [ "$ip_scan_result" != "" ] || [ "$arp_scan_result" != "" ] ; then
 
-			#NO DUPLICATE MESSAGES
-			[ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" '100' "$name_scan_result" "$duration_timer"
+      #STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
+      [ "${device_statuses[$index]}" == '100' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
 
-			#USER STATUS
-			device_statuses[$index]="100"
+      #NO DUPLICATE MESSAGES
+      [ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" '100' "$name_scan_result" "$duration_timer"
 
-			#SET AT LEAST ONE DEVICE HOME
-			one_owner_home=1
+      #USER STATUS
+      device_statuses[$index]="100"
 
-			#SET NAME ARRAY
-			device_names[$index]="$name_scan_result"
+      #SET AT LEAST ONE DEVICE HOME
+      one_owner_home=1
 
-		else
+      #SET NAME ARRAY
+      device_names[$index]="$name_scan_result"
 
-			#USER STATUS
-			status="${device_statuses[$index]}"
+    else
 
-			if [ -z "$status" ]; then
-				status="0"
-			fi
+      #USER STATUS
+      status="${device_statuses[$index]}"
 
-			#BY DEFAULT, SET REPETITION TO PREFERENCE
-			repetitions="$verification_of_away_loop_size"
+      if [ -z "$status" ]; then
+        status="0"
+      fi
 
-			#IF WE ARE JUST STARTING OR, ALTERNATIVELY, WE HAVE RECORDED THE STATUS
-			#OF NOT HOME ALREADY, ONLY SCAN ONE MORE TIME.
-			if [ "$status" == 0 ];then
-				repetitions=1
-			fi
+      #BY DEFAULT, SET REPETITION TO PREFERENCE
+      repetitions="$verification_of_away_loop_size"
 
-			#SHOULD VERIFY ABSENSE
-			for repetition in $(seq 1 $repetitions);
-			do
-				#RESET OK TO PUBLISH
-				ok_to_publish=1
+      #IF WE ARE JUST STARTING OR, ALTERNATIVELY, WE HAVE RECORDED THE STATUS
+      #OF NOT HOME ALREADY, ONLY SCAN ONE MORE TIME.
+      if [ "$status" == 0 ];then
+        repetitions=1
+      fi
 
-				#VERIFICATION LOOP DELAY
-				sleep "$verification_of_away_loop_delay"
+      #SHOULD VERIFY ABSENSE
+      for repetition in $(seq 1 $repetitions);
+      do
+        #RESET OK TO PUBLISH
+        ok_to_publish=1
 
-				#GET PERCENTAGE
-				percentage=$(($status * ( $repetitions - $repetition) / $repetitions))
+        #VERIFICATION LOOP DELAY
+        sleep "$verification_of_away_loop_delay"
 
-				#ONLY SCAN IF OUR STATUS IS NOT ALREADY 0
-				if [ "$status" != 0 ];then
+        #GET PERCENTAGE
+        percentage=$(($status * ( $repetitions - $repetition) / $repetitions))
 
-					#MARK BEGINNING OF SCAN OPERATION
-					start_timer=$(date +%s%N)
+        #ONLY SCAN IF OUR STATUS IS NOT ALREADY 0
+        if [ "$status" != 0 ];then
 
-					#PERFORM SCAN
-					name_scan_result_verify=$(scan $current_device_address)
+          #MARK BEGINNING OF SCAN OPERATION
+          start_timer=$(date +%s%N)
+
+          #PERFORM SCAN
+          name_scan_result_verify=$(scan $current_device_address)
           ip_scan_result_verify=$(ip_scan $current_device_ip_address)
           arp_scan_result_verify=$(arp_scan $current_device_ip_address)
 
-					#MARK END OF SCAN OPERATION
-					end_time=$(date +%s%N)
+          #MARK END OF SCAN OPERATION
+          end_time=$(date +%s%N)
 
-					#CALCULATE DIFFERENCE
-					duration_timer=$(( (end_time - start_timer) / 1000000 ))
+          #CALCULATE DIFFERENCE
+          duration_timer=$(( (end_time - start_timer) / 1000000 ))
 
-					#CHECK SCAN
-					if [ "$name_scan_result_verify" != "" ] || [ "$ip_scan_result_verify" != "" ] || [ "$arp_scan_result_verify" != "" ] ; then
+          #CHECK SCAN
+          if [ "$name_scan_result_verify" != "" ] || [ "$ip_scan_result_verify" != "" ] || [ "$arp_scan_result_verify" != "" ] ; then
 
-						#STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
-						[ "${device_statuses[$index]}" == '100' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
+            #STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
+            [ "${device_statuses[$index]}" == '100' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
 
-						#PUBLISH
-						[ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" '100' "$name_scan_result_verify" "$duration_timer"
+            #PUBLISH
+            [ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" '100' "$name_scan_result_verify" "$duration_timer"
 
-						#SET AT LEAST ONE DEVICE HOME
-						one_owner_home=1
+            #SET AT LEAST ONE DEVICE HOME
+            one_owner_home=1
 
-						#WE KNOW THAT WE MUST HAVE BEEN AT A PREVIOUSLY-SEEN USER STATUS
-						device_statuses[$index]="100"
+            #WE KNOW THAT WE MUST HAVE BEEN AT A PREVIOUSLY-SEEN USER STATUS
+            device_statuses[$index]="100"
 
-						#UPDATE NAME ARRAY
-						device_names[$index]="$name_scan_result_verify"
+            #UPDATE NAME ARRAY
+            device_names[$index]="$name_scan_result_verify"
 
-						#MUST BREAK CONFIDENCE SCANNING LOOP; 100' ISCOVERED
-						break
-					fi
-				fi
+            #MUST BREAK CONFIDENCE SCANNING LOOP; 100' ISCOVERED
+            break
+          fi
+        fi
 
-				#RETREIVE LAST-KNOWN NAME FOR PUBLICATION; SINCE WE OBVIOUSLY DIDN'T RECEIVE A NAME SCAN RESULT
-				expectedName="${device_names[$index]}"
+        #RETREIVE LAST-KNOWN NAME FOR PUBLICATION; SINCE WE OBVIOUSLY DIDN'T RECEIVE A NAME SCAN RESULT
+        expectedName="${device_names[$index]}"
 
-				if [ "$percentage" == "0" ]; then
-					#STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
-					[ "${device_statuses[$index]}" == '0' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
+        if [ "$percentage" == "0" ]; then
+          #STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
+          [ "${device_statuses[$index]}" == '0' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
 
-					#PRINT ZERO CONFIDENCE OF A DEVICE AT HOME
-					[ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" "0" "$expectedName" "$duration_timer"
-				else
-					#STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
-					[ "${device_statuses[$index]}" == '$percentage' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
+          #PRINT ZERO CONFIDENCE OF A DEVICE AT HOME
+          [ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" "0" "$expectedName" "$duration_timer"
+        else
+          #STATE IS SAME && ONLY REPORT CHANGES THEN DISABLE PUBLICATION
+          [ "${device_statuses[$index]}" == '$percentage' ] && [ "$changes_only" == 1 ] && ok_to_publish=0
 
-					#IF BINARY ONLY, THEN DISABLE PUBLICATION
-					[ "$binary_only" == "1" ] && ok_to_publish=0
+          #IF BINARY ONLY, THEN DISABLE PUBLICATION
+          [ "$binary_only" == "1" ] && ok_to_publish=0
 
-					#REPORT CONFIDENCE DROP
-					[ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" "$percentage" "$expectedName" "$duration_timer"
-				fi
+          #REPORT CONFIDENCE DROP
+          [ "$ok_to_publish" == "1" ] && publish "/$mqtt_room/$current_device_address" "$percentage" "$expectedName" "$duration_timer"
+        fi
 
-				#UPDATE STATUS ARRAY
-				device_statuses[$index]="$percentage"
-			done
-		fi
-	done
+        #UPDATE STATUS ARRAY
+        device_statuses[$index]="$percentage"
+      done
+    fi
+  done
 
-	#CHECK STATUS ARRAY FOR ANY DEVICE MARKED AS 'HOME'
-	wait_duration=0
+  #CHECK STATUS ARRAY FOR ANY DEVICE MARKED AS 'HOME'
+  wait_duration=0
 
-	#DETERMINE APPROPRIATE DELAY
-	if [ "$one_owner_home" == 1 ]; then
-		 wait_duration=$delay_between_owner_scans_present
-	else
-		wait_duration=$delay_between_owner_scans_away
-	fi
+  #DETERMINE APPROPRIATE DELAY
+  if [ "$one_owner_home" == 1 ]; then
+     wait_duration=$delay_between_owner_scans_present
+  else
+    wait_duration=$delay_between_owner_scans_away
+  fi
 
-	sleep "$wait_duration"
+  sleep "$wait_duration"
 done
