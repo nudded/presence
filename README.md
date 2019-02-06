@@ -1,6 +1,8 @@
 presence
 =======
 
+Nuddeds notes: Depends on `hping3` and `ping` and `arping`
+
 ***Note: as of `presence` 0.5.1, triggered scans, guest scanning, and beacon scanning are removed from `presence.sh` for simplification. Please consider using [monitor](http://github.com/andrewjfreyer/monitor) instead for beacon scanning and detection and for generic device detection. It is unlikely that `presence` will receive substantive updates after version 0.5.1.***
 
 ____
@@ -261,7 +263,7 @@ mqtt_topicpath="location"
 mqtt_room="your pi's location"
 ```
 
-11. **[CONFIGURE PRESENCE]** create file named **owner_devices** and include mac addresses of devices on separate lines. 
+11. **[CONFIGURE PRESENCE]** create file named **owner_devices** and include mac and ip addresses of devices on separate lines. 
 
 ```
 nano owner_devices
@@ -270,8 +272,8 @@ nano owner_devices
 Then...
 
 ```
-00:00:00:00:00 #comments 
-00:00:00:00:00
+00:00:00:00:00 10.0.0.2 #comments 
+00:00:00:00:00 10.0.0.4
 ```
 
 12. **[CONFIGURE SERVICE]** Create file at **/etc/systemd/system/presence.service** and include content:
